@@ -45,6 +45,7 @@ export interface Reservation {
   id: number;
   bookId: number;
   bookTitle: string;
+  bookAuthor: string;
   bookIsbn: string;
   bookCoverUrl?: string;
   memberId: number;
