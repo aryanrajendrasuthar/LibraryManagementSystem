@@ -43,7 +43,8 @@ public class BorrowingService {
         if (!book.isAvailable()) {
             throw new BusinessException("No copies available for borrowing");
         }
-        if (loanRepository.existsByBookIdAndMemberIdAndStatus(bookId, member.getId(), LoanStatus.ACTIVE)) {
+        if (loanRepository.existsByBookIdAndMemberIdAndStatus(bookId, member.getId(), LoanStatus.ACTIVE) ||
+                loanRepository.existsByBookIdAndMemberIdAndStatus(bookId, member.getId(), LoanStatus.OVERDUE)) {
             throw new BusinessException("You already have an active loan for this book");
         }
         long activeLoans = loanRepository.countActiveLoansByMember(member.getId());
@@ -72,8 +73,7 @@ public class BorrowingService {
         Loan loan = loanRepository.findById(loanId)
                 .orElseThrow(() -> new ResourceNotFoundException("Loan not found"));
 
-        if (!loan.getMember().getEmail().equals(memberEmail) &&
-                !memberEmail.equals("admin")) {
+        if (!loan.getMember().getEmail().equals(memberEmail)) {
             throw new BusinessException("Unauthorized to return this loan");
         }
         if (loan.getStatus() == LoanStatus.RETURNED) {

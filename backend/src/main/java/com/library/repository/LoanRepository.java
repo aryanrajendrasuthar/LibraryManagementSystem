@@ -22,9 +22,11 @@ public interface LoanRepository extends JpaRepository<Loan, Long> {
 
     boolean existsByBookIdAndMemberIdAndStatus(Long bookId, Long memberId, LoanStatus status);
 
-    @Query("SELECT COUNT(l) FROM Loan l WHERE l.member.id = :memberId AND l.status = 'ACTIVE'")
+    // Count ACTIVE + OVERDUE — both consume borrowing limit
+    @Query("SELECT COUNT(l) FROM Loan l WHERE l.member.id = :memberId AND l.status IN ('ACTIVE', 'OVERDUE')")
     long countActiveLoansByMember(@Param("memberId") Long memberId);
 
+    // Only ACTIVE loans past due date — picked up by scheduler to mark OVERDUE
     @Query("SELECT l FROM Loan l WHERE l.status = 'ACTIVE' AND l.dueDate < :now")
     List<Loan> findOverdueLoans(@Param("now") LocalDateTime now);
 
@@ -36,9 +38,9 @@ public interface LoanRepository extends JpaRepository<Loan, Long> {
     @Query("SELECT FUNCTION('TO_CHAR', l.borrowedAt, 'YYYY-MM') as month, COUNT(l) FROM Loan l GROUP BY FUNCTION('TO_CHAR', l.borrowedAt, 'YYYY-MM') ORDER BY month DESC")
     List<Object[]> countLoansPerMonth();
 
-    @Query("SELECT COUNT(l) FROM Loan l WHERE l.status = 'ACTIVE'")
+    @Query("SELECT COUNT(l) FROM Loan l WHERE l.status IN ('ACTIVE', 'OVERDUE')")
     long countActiveLoans();
 
-    @Query("SELECT COUNT(l) FROM Loan l WHERE l.status = 'ACTIVE' AND l.dueDate < :now")
-    long countOverdueLoans(@Param("now") LocalDateTime now);
+    @Query("SELECT COUNT(l) FROM Loan l WHERE l.status = 'OVERDUE'")
+    long countOverdueLoans();
 }

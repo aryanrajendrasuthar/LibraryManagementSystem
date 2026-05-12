@@ -7,7 +7,6 @@ import com.library.repository.ReservationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +25,7 @@ public class AnalyticsService {
         stats.put("totalBooks", bookRepository.count());
         stats.put("totalMembers", memberRepository.count());
         stats.put("activeLoans", loanRepository.countActiveLoans());
-        stats.put("overdueLoans", loanRepository.countOverdueLoans(LocalDateTime.now()));
+        stats.put("overdueLoans", loanRepository.countOverdueLoans());
 
         // Books by category
         List<Object[]> catData = bookRepository.countByEachCategory();

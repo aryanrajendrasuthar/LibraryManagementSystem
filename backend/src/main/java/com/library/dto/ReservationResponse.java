@@ -11,6 +11,7 @@ public class ReservationResponse {
     private Long id;
     private Long bookId;
     private String bookTitle;
+    private String bookAuthor;
     private String bookIsbn;
     private String bookCoverUrl;
     private Long memberId;
@@ -23,6 +24,7 @@ public class ReservationResponse {
                 .id(r.getId())
                 .bookId(r.getBook().getId())
                 .bookTitle(r.getBook().getTitle())
+                .bookAuthor(r.getBook().getAuthor())
                 .bookIsbn(r.getBook().getIsbn())
                 .bookCoverUrl(r.getBook().getCoverUrl())
                 .memberId(r.getMember().getId())

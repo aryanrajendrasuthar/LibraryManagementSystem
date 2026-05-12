@@ -1,6 +1,7 @@
 package com.library.service;
 
 import com.library.entity.Loan;
+import com.library.entity.Loan.LoanStatus;
 import com.library.repository.LoanRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,14 +21,17 @@ public class OverdueScheduler {
     private final LoanRepository loanRepository;
     private final EmailService emailService;
 
-    // Runs every day at 8 AM
+    // Runs every day at 8 AM — marks overdue and sends reminder emails
     @Scheduled(cron = "0 0 8 * * *")
     @Transactional
     public void sendOverdueReminders() {
-        List<Loan> overdueLoans = loanRepository.findOverdueLoans(LocalDateTime.now());
+        LocalDateTime now = LocalDateTime.now();
+        List<Loan> overdueLoans = loanRepository.findOverdueLoans(now);
         log.info("Found {} overdue loans", overdueLoans.size());
         overdueLoans.forEach(loan -> {
-            long days = ChronoUnit.DAYS.between(loan.getDueDate(), LocalDateTime.now());
+            loan.setStatus(LoanStatus.OVERDUE);
+            loanRepository.save(loan);
+            long days = ChronoUnit.DAYS.between(loan.getDueDate(), now);
             emailService.sendOverdueReminderEmail(
                     loan.getMember().getEmail(),
                     loan.getMember().getName(),
